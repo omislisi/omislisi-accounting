@@ -1,0 +1,13 @@
+creation_rules:
+  - path_regex: deploy/development/settings\.py$
+    pgp: >-
+      CBB9598C22C06868
+  - path_regex: deploy/production/settings\.py$
+    pgp: >-
+      CBB9598C22C06868
+  - path_regex: deploy/production/55899889\.p12$
+    pgp: >-
+      CBB9598C22C06868
+  - path_regex: deploy/production/htpasswd$
+    pgp: >-
+      CBB9598C22C06868

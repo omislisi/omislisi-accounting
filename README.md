@@ -197,6 +197,41 @@ Use the provided script for automated dashboard updates:
 
 The generated dashboard is fully static (HTML, CSS, JavaScript) and can be hosted on any web server or file hosting service.
 
+## Deployment
+
+The dashboard can be deployed to a production server using Fabric. See [deploy/README.md](deploy/README.md) for detailed deployment instructions.
+
+### Quick Start
+
+1. **Install dependencies** (including deployment tools):
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   This includes `fab-classic` (Fabric 1.x compatible) for deployment.
+
+2. **Deploy to server**:
+   ```bash
+   fab web deploy
+   ```
+
+   This will automatically generate the dashboard from your local transaction data and deploy it to the server.
+
+### Initial Setup
+
+For first-time deployment, run:
+
+```bash
+fab web setup
+```
+
+This sets up:
+- Nginx configuration
+- SSL certificate (Let's Encrypt)
+- HTTP Basic Auth
+
+See [deploy/README.md](deploy/README.md) for complete deployment documentation.
+
 ## Customization
 
 ### Adding Categories

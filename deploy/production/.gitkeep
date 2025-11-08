@@ -1,0 +1,8 @@
+# This directory contains SOPS-encrypted deployment files
+#
+# To create the htpasswd file:
+# 1. Create unencrypted file: htpasswd -c deploy/production/htpasswd username
+# 2. Encrypt it: fab encrypt_htpasswd
+#
+# The encrypted htpasswd file should be committed to git.
+
