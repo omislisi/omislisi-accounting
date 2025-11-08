@@ -1,0 +1,6 @@
+# Omislisi Accounting Configuration
+# Copy this file to config.yaml and update the paths
+
+# Path to the reports directory containing bank statements and PayPal exports
+reports_path: "/path/to/your/reports/directory"
+

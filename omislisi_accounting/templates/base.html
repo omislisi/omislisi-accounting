@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}Financial Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <link rel="stylesheet" href="static/dashboard.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Financial Dashboard</h1>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="{{ nav_index }}">Overview</a></li>
+                <li><a href="categories.html" class="{{ nav_categories }}">Categories</a></li>
+                <li><a href="counterparties.html" class="{{ nav_counterparties }}">Counterparties</a></li>
+                <li><a href="category_trends.html" class="{{ nav_category_trends }}">Category Trends</a></li>
+                <li><a href="counterparty_trends.html" class="{{ nav_counterparty_trends }}">Counterparty Trends</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    {{ month_selector_html }}
+
+    <main class="main-content">
+        {{ content }}
+    </main>
+
+    <footer class="footer">
+        <p>Generated at: <span id="generated-time">{{ generated_at }}</span></p>
+    </footer>
+
+    <script src="static/dashboard.js"></script>
+</body>
+</html>
+

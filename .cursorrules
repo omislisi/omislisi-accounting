@@ -1,0 +1,30 @@
+# Cursor Rules for omislisi-accounting
+
+## Project Structure
+- **Source files**: Edit files in `omislisi_accounting/templates/static/` (dashboard.js, dashboard.css)
+- **Generated output**: Files in `dashboard/` are generated output - DO NOT edit these directly
+- **Workflow**: Edit source → Regenerate dashboard → Output is automatically copied from source
+
+## Dashboard Generation
+- Always edit source files in `omislisi_accounting/templates/static/` directory
+- Never copy files from `dashboard/static/` back to source - this is backwards!
+- To regenerate: `source venv/bin/activate && oa generate-dashboard --output-dir ./dashboard`
+- The renderer (`omislisi_accounting/templates/renderer.py`) automatically copies static files from source to output
+
+## File Editing Workflow
+1. Identify if a file is source or generated output
+2. Edit source files only (in `omislisi_accounting/` directory)
+3. Regenerate the dashboard to see changes
+4. Never manually copy generated files back to source
+
+## Command Execution
+- Always activate virtual environment first: `source venv/bin/activate`
+- Use `oa` command after venv activation
+- Alternative: `python -m omislisi_accounting.cli.main <command>`
+
+## Key Directories
+- `omislisi_accounting/templates/static/` - Source static files (CSS, JS)
+- `omislisi_accounting/templates/renderer.py` - Dashboard HTML generation
+- `dashboard/` - Generated output (do not edit directly)
+- `omislisi_accounting/cli/main.py` - CLI commands including `generate-dashboard`
+
