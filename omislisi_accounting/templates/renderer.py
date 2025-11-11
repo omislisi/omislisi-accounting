@@ -121,11 +121,28 @@ def render_index(dashboard_data: Dict[str, Any], output_dir: Path):
     content = f"""
     <div class="card">
         <h2 class="card-header">Overview</h2>
-        <div style="margin-bottom: 1.5rem;">
-            <label for="period-selector" style="margin-right: 0.5rem; font-weight: 600;">Period:</label>
-            <select id="period-selector" class="month-selector" style="min-width: 200px;">
-                <option value="ytd">Year-to-Date</option>
-            </select>
+        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center;">
+                <label for="period-selector" style="margin-right: 0.5rem; font-weight: 600;">Period:</label>
+                <select id="period-selector" class="month-selector" style="min-width: 200px;">
+                    <option value="ytd">Year-to-Date</option>
+                </select>
+            </div>
+            <div id="custom-range-container" style="display: none; padding: 0.75rem 1rem; background-color: #f8f9fa; border-radius: 4px; border: 1px solid #bdc3c7;">
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <label for="custom-range-start" style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem;">Start Date:</label>
+                        <input type="date" id="custom-range-start" class="month-selector" style="padding: 0.5rem;">
+                    </div>
+                    <div>
+                        <label for="custom-range-end" style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem;">End Date:</label>
+                        <input type="date" id="custom-range-end" class="month-selector" style="padding: 0.5rem;">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button id="apply-custom-range" style="padding: 0.5rem 1rem; cursor: pointer; border: 1px solid #3498db; border-radius: 4px; background: #3498db; color: white; font-weight: 600;">Apply Range</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="year-progress-container" style="margin-bottom: 1.5rem; display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">

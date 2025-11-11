@@ -2587,6 +2587,24 @@ function filterTransactionsByPeriod(transactions, period, currentYear) {
             const txDate = new Date(tx.date);
             return txYear === year && txDate <= currentDate;
         });
+    } else if (period === 'alltime') {
+        // Return all transactions
+        return transactions.filter(tx => tx.date);
+    } else if (period.startsWith('custom:')) {
+        // Handle custom range: format is "custom:YYYY-MM-DD:YYYY-MM-DD"
+        const parts = period.split(':');
+        if (parts.length === 3) {
+            const startDate = new Date(parts[1]);
+            const endDate = new Date(parts[2]);
+            // Set end date to end of day
+            endDate.setHours(23, 59, 59, 999);
+            return transactions.filter(tx => {
+                if (!tx.date) return false;
+                const txDate = new Date(tx.date);
+                return txDate >= startDate && txDate <= endDate;
+            });
+        }
+        return transactions;
     } else if (period.startsWith('year:')) {
         const year = period.split(':')[1];
         return transactions.filter(tx => tx.date && tx.date.startsWith(year));
@@ -4552,6 +4570,18 @@ function initializeOverviewPeriodSelector(data) {
     ytdOption.selected = true;
     periodSelector.appendChild(ytdOption);
 
+    // Add All Time option
+    const allTimeOption = document.createElement('option');
+    allTimeOption.value = 'alltime';
+    allTimeOption.textContent = '🕐 All Time';
+    periodSelector.appendChild(allTimeOption);
+
+    // Add Custom Range option
+    const customRangeOption = document.createElement('option');
+    customRangeOption.value = 'custom';
+    customRangeOption.textContent = '📅 Custom Range';
+    periodSelector.appendChild(customRangeOption);
+
     // Add separator
     const separator1 = document.createElement('option');
     separator1.disabled = true;
@@ -4608,8 +4638,77 @@ function initializeOverviewPeriodSelector(data) {
     periodSelector.addEventListener('change', function() {
         categoryPage = 1;
         counterpartyPage = 1;
+
+        // Show/hide custom range container
+        const customRangeContainer = document.getElementById('custom-range-container');
+        if (customRangeContainer) {
+            if (this.value === 'custom') {
+                customRangeContainer.style.display = 'flex';
+                // Don't update view yet - wait for user to select dates
+                return;
+            } else {
+                customRangeContainer.style.display = 'none';
+            }
+        }
+
         updateOverviewPeriodView(data, this.value);
     });
+
+    // Setup custom range date inputs and apply button
+    const customRangeContainer = document.getElementById('custom-range-container');
+    const customRangeStart = document.getElementById('custom-range-start');
+    const customRangeEnd = document.getElementById('custom-range-end');
+    const applyCustomRangeBtn = document.getElementById('apply-custom-range');
+
+    if (customRangeContainer && customRangeStart && customRangeEnd && applyCustomRangeBtn) {
+        // Set default dates (first transaction date to today)
+        if (data.all_transactions && data.all_transactions.length > 0) {
+            const dates = data.all_transactions
+                .map(tx => tx.date)
+                .filter(d => d)
+                .sort();
+            if (dates.length > 0) {
+                customRangeStart.value = dates[0];
+            }
+        }
+        if (!customRangeEnd.value) {
+            const today = new Date();
+            customRangeEnd.value = today.toISOString().split('T')[0];
+        }
+
+        // Apply button handler
+        applyCustomRangeBtn.addEventListener('click', function() {
+            const startDate = customRangeStart.value;
+            const endDate = customRangeEnd.value;
+
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('Start date must be before end date');
+                return;
+            }
+
+            const customPeriod = `custom:${startDate}:${endDate}`;
+            categoryPage = 1;
+            counterpartyPage = 1;
+            updateOverviewPeriodView(data, customPeriod);
+        });
+
+        // Allow Enter key to apply
+        customRangeStart.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyCustomRangeBtn.click();
+            }
+        });
+        customRangeEnd.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyCustomRangeBtn.click();
+            }
+        });
+    }
 }
 
 function updateOverviewPeriodView(data, period) {
@@ -4671,6 +4770,26 @@ function updateOverviewTrendsChart(data, period) {
         monthsToShow = allMonths
             .filter(m => m.startsWith(String(currentYear)))
             .slice(-6);
+    } else if (period === 'alltime') {
+        // Show last 12 months for all time view
+        const allMonths = Object.keys(data.all_months).sort();
+        monthsToShow = allMonths.slice(-12);
+    } else if (period.startsWith('custom:')) {
+        // For custom range, show months within the range
+        const parts = period.split(':');
+        if (parts.length === 3) {
+            const startDate = new Date(parts[1]);
+            const endDate = new Date(parts[2]);
+            const allMonths = Object.keys(data.all_months).sort();
+            monthsToShow = allMonths.filter(m => {
+                const monthDate = new Date(m + '-01');
+                return monthDate >= startDate && monthDate <= endDate;
+            });
+            // Limit to last 12 months if range is very large
+            if (monthsToShow.length > 12) {
+                monthsToShow = monthsToShow.slice(-12);
+            }
+        }
     } else if (period.startsWith('year:')) {
         const year = period.split(':')[1];
         const allMonths = Object.keys(data.all_months).sort();
@@ -4735,6 +4854,9 @@ function updateYearProgress(period, currentYear) {
         progressContainer.style.display = 'block';
         progressBar.style.width = `${progress}%`;
         progressText.textContent = `${currentMonth}/12 months (${progress.toFixed(1)}%)`;
+    } else if (period === 'alltime' || period.startsWith('custom:')) {
+        // Hide progress bar for all time and custom range
+        progressContainer.style.display = 'none';
     } else {
         progressContainer.style.display = 'none';
     }
