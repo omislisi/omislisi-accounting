@@ -4738,7 +4738,7 @@ function updateOverviewPeriodView(data, period) {
     // Update monthly breakdown chart
     updateMonthlyBreakdownChart(data, period, filteredTransactions);
 
-    // Update recent trends chart (show last 6 months)
+    // Update trends chart (matches selected period)
     updateOverviewTrendsChart(data, period);
 
     // Update top categories and counterparties
@@ -4761,46 +4761,34 @@ function updateOverviewTrendsChart(data, period) {
     const ctx = document.getElementById('recentTrendsChart');
     if (!ctx || !data.all_months) return;
 
-    // Determine which months to show based on period
+    // Determine which months to show based on period - use same logic as monthly breakdown chart
     let monthsToShow = [];
+    const allMonths = Object.keys(data.all_months || {}).sort();
 
     if (period === 'ytd') {
         const currentYear = data.current_year || new Date().getFullYear();
-        const allMonths = Object.keys(data.all_months).sort();
-        monthsToShow = allMonths
-            .filter(m => m.startsWith(String(currentYear)))
-            .slice(-6);
+        monthsToShow = allMonths.filter(m => m.startsWith(String(currentYear)));
     } else if (period === 'alltime') {
-        // Show last 12 months for all time view
-        const allMonths = Object.keys(data.all_months).sort();
-        monthsToShow = allMonths.slice(-12);
+        // For all time, show all available months
+        monthsToShow = allMonths;
     } else if (period.startsWith('custom:')) {
-        // For custom range, show months within the range
+        // For custom range, extract dates and show months within range
         const parts = period.split(':');
         if (parts.length === 3) {
             const startDate = new Date(parts[1]);
             const endDate = new Date(parts[2]);
-            const allMonths = Object.keys(data.all_months).sort();
             monthsToShow = allMonths.filter(m => {
                 const monthDate = new Date(m + '-01');
                 return monthDate >= startDate && monthDate <= endDate;
             });
-            // Limit to last 12 months if range is very large
-            if (monthsToShow.length > 12) {
-                monthsToShow = monthsToShow.slice(-12);
-            }
         }
     } else if (period.startsWith('year:')) {
         const year = period.split(':')[1];
-        const allMonths = Object.keys(data.all_months).sort();
-        monthsToShow = allMonths
-            .filter(m => m.startsWith(year))
-            .slice(-6);
+        monthsToShow = allMonths.filter(m => m.startsWith(year));
     } else if (period.startsWith('quarter:')) {
         const [year, quarter] = period.split(':')[1].split('-Q');
         const startMonth = (parseInt(quarter) - 1) * 3 + 1;
         const endMonth = startMonth + 2;
-        const allMonths = Object.keys(data.all_months).sort();
         monthsToShow = allMonths.filter(m => {
             const mYear = m.split('-')[0];
             const mMonth = parseInt(m.split('-')[1]);
@@ -4808,7 +4796,6 @@ function updateOverviewTrendsChart(data, period) {
         });
     } else if (period.startsWith('month:')) {
         const month = period.split(':')[1];
-        const allMonths = Object.keys(data.all_months).sort();
         const monthIndex = allMonths.indexOf(month);
         monthsToShow = allMonths.slice(Math.max(0, monthIndex - 5), monthIndex + 1);
     }
@@ -4942,20 +4929,32 @@ function updateMonthlyBreakdownChart(data, period, filteredTransactions) {
     // Determine which months to show based on period
     let monthsToShow = [];
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const allMonths = Object.keys(data.all_months || {}).sort();
 
     if (period === 'ytd') {
         const currentYear = data.current_year || new Date().getFullYear();
-        const allMonths = Object.keys(data.all_months || {}).sort();
         monthsToShow = allMonths.filter(m => m.startsWith(String(currentYear)));
+    } else if (period === 'alltime') {
+        // For all time, show all available months
+        monthsToShow = allMonths;
+    } else if (period.startsWith('custom:')) {
+        // For custom range, extract dates and show months within range
+        const parts = period.split(':');
+        if (parts.length === 3) {
+            const startDate = new Date(parts[1]);
+            const endDate = new Date(parts[2]);
+            monthsToShow = allMonths.filter(m => {
+                const monthDate = new Date(m + '-01');
+                return monthDate >= startDate && monthDate <= endDate;
+            });
+        }
     } else if (period.startsWith('year:')) {
         const year = period.split(':')[1];
-        const allMonths = Object.keys(data.all_months || {}).sort();
         monthsToShow = allMonths.filter(m => m.startsWith(year));
     } else if (period.startsWith('quarter:')) {
         const [year, quarter] = period.split(':')[1].split('-Q');
         const startMonth = (parseInt(quarter) - 1) * 3 + 1;
         const endMonth = startMonth + 2;
-        const allMonths = Object.keys(data.all_months || {}).sort();
         monthsToShow = allMonths.filter(m => {
             const mYear = m.split('-')[0];
             const mMonth = parseInt(m.split('-')[1]);
@@ -4963,7 +4962,6 @@ function updateMonthlyBreakdownChart(data, period, filteredTransactions) {
         });
     } else if (period.startsWith('month:')) {
         const month = period.split(':')[1];
-        const allMonths = Object.keys(data.all_months || {}).sort();
         const monthIndex = allMonths.indexOf(month);
         monthsToShow = allMonths.slice(Math.max(0, monthIndex - 5), monthIndex + 1);
     }
@@ -5273,20 +5271,32 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
     // Determine which months to show based on period
     let monthsToShow = [];
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const allMonths = Object.keys(data.all_months || {}).sort();
 
     if (period === 'ytd') {
         const currentYearNum = currentYear || new Date().getFullYear();
-        const allMonths = Object.keys(data.all_months || {}).sort();
         monthsToShow = allMonths.filter(m => m.startsWith(String(currentYearNum)));
+    } else if (period === 'alltime') {
+        // For all time, show all available months
+        monthsToShow = allMonths;
+    } else if (period.startsWith('custom:')) {
+        // For custom range, extract dates and show months within range
+        const parts = period.split(':');
+        if (parts.length === 3) {
+            const startDate = new Date(parts[1]);
+            const endDate = new Date(parts[2]);
+            monthsToShow = allMonths.filter(m => {
+                const monthDate = new Date(m + '-01');
+                return monthDate >= startDate && monthDate <= endDate;
+            });
+        }
     } else if (period.startsWith('year:')) {
         const year = period.split(':')[1];
-        const allMonths = Object.keys(data.all_months || {}).sort();
         monthsToShow = allMonths.filter(m => m.startsWith(year));
     } else if (period.startsWith('quarter:')) {
         const [year, quarter] = period.split(':')[1].split('-Q');
         const startMonth = (parseInt(quarter) - 1) * 3 + 1;
         const endMonth = startMonth + 2;
-        const allMonths = Object.keys(data.all_months || {}).sort();
         monthsToShow = allMonths.filter(m => {
             const mYear = m.split('-')[0];
             const mMonth = parseInt(m.split('-')[1]);
@@ -5355,6 +5365,28 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
     } else if (period.startsWith('year:')) {
         const year = period.split(':')[1];
         comparisonPeriod = `year:${parseInt(year) - 1}`;
+    } else if (period === 'alltime' || period.startsWith('custom:')) {
+        // For alltime and custom ranges, compare to previous year's same period
+        // Extract the date range from monthsToShow
+        if (monthsToShow.length > 0) {
+            const firstMonth = monthsToShow[0];
+            const lastMonth = monthsToShow[monthsToShow.length - 1];
+            const [firstYear, firstMonthNum] = firstMonth.split('-');
+            const [lastYear, lastMonthNum] = lastMonth.split('-');
+
+            // Calculate previous year's range
+            const prevFirstYear = parseInt(firstYear) - 1;
+            const prevLastYear = parseInt(lastYear) - 1;
+
+            // Check if we have data for previous year
+            const prevFirstMonth = `${prevFirstYear}-${firstMonthNum}`;
+            const prevLastMonth = `${prevLastYear}-${lastMonthNum}`;
+
+            if (allMonths.includes(prevFirstMonth) || allMonths.includes(prevLastMonth)) {
+                // Use custom period format for comparison
+                comparisonPeriod = `custom:${prevFirstYear}-${firstMonthNum}-01:${prevLastYear}-${lastMonthNum}-31`;
+            }
+        }
     }
 
     // Get comparison transactions
@@ -5379,6 +5411,8 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
                 const txMonth = tx.date.substring(5, 7);
                 return txYear === compareYear && currentYearMonths.has(txMonth);
             });
+        } else if (comparisonPeriod.startsWith('custom:')) {
+            comparisonTransactions = filterTransactionsByPeriod(data.all_transactions, comparisonPeriod, currentYear);
         } else {
             comparisonTransactions = filterTransactionsByPeriod(data.all_transactions, comparisonPeriod, currentYear);
         }
@@ -5395,6 +5429,17 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
             const [year, month] = m.split('-');
             return `${compareYear}-${month}`;
         });
+    } else if (comparisonPeriod && comparisonPeriod.startsWith('custom:')) {
+        // For custom comparison, extract dates and show months within range
+        const parts = comparisonPeriod.split(':');
+        if (parts.length === 3) {
+            const startDate = new Date(parts[1]);
+            const endDate = new Date(parts[2]);
+            comparisonMonthsToShow = allMonths.filter(m => {
+                const monthDate = new Date(m + '-01');
+                return monthDate >= startDate && monthDate <= endDate;
+            });
+        }
     } else if (comparisonPeriod && comparisonPeriod.startsWith('month:')) {
         const month = comparisonPeriod.split(':')[1];
         comparisonMonthsToShow = [month];
@@ -5402,7 +5447,6 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
         const [year, quarter] = comparisonPeriod.split(':')[1].split('-Q');
         const startMonth = (parseInt(quarter) - 1) * 3 + 1;
         const endMonth = startMonth + 2;
-        const allMonths = Object.keys(data.all_months || {}).sort();
         comparisonMonthsToShow = allMonths.filter(m => {
             const mYear = m.split('-')[0];
             const mMonth = parseInt(m.split('-')[1]);
@@ -5410,7 +5454,6 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
         });
     } else if (comparisonPeriod && comparisonPeriod.startsWith('year:')) {
         const year = comparisonPeriod.split(':')[1];
-        const allMonths = Object.keys(data.all_months || {}).sort();
         comparisonMonthsToShow = allMonths.filter(m => m.startsWith(year));
     }
 
@@ -5439,6 +5482,12 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
             const [, month] = m.split('-');
             const compareMonth = `${compareYear}-${month}`;
             return comparisonMonthlyNet[compareMonth] || 0;
+        } else if (comparisonPeriod && comparisonPeriod.startsWith('custom:')) {
+            // For custom comparison, match by month number (same month, previous year)
+            const [year, month] = m.split('-');
+            const compareYear = parseInt(year) - 1;
+            const compareMonth = `${compareYear}-${month}`;
+            return comparisonMonthlyNet[compareMonth] || 0;
         } else {
             // For other comparisons, try to match by position or find corresponding month
             const index = monthsToShow.indexOf(m);
@@ -5455,7 +5504,24 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
     let comparisonLabel = comparison.label || 'Previous Period';
 
     // Simplify labels
-    if (period.startsWith('year:')) {
+    if (period === 'alltime') {
+        currentLabel = 'All Time';
+    } else if (period.startsWith('custom:')) {
+        const parts = period.split(':');
+        if (parts.length === 3) {
+            const startDate = new Date(parts[1]);
+            const endDate = new Date(parts[2]);
+            const startYear = startDate.getFullYear();
+            const startMonth = monthNames[startDate.getMonth()];
+            const endYear = endDate.getFullYear();
+            const endMonth = monthNames[endDate.getMonth()];
+            if (startYear === endYear) {
+                currentLabel = `${startMonth} - ${endMonth} ${startYear}`;
+            } else {
+                currentLabel = `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
+            }
+        }
+    } else if (period.startsWith('year:')) {
         currentLabel = period.split(':')[1];
     } else if (period.startsWith('quarter:')) {
         const [year, quarter] = period.split(':')[1].split('-Q');
@@ -5469,6 +5535,21 @@ function updateNetComparisonChart(data, period, currentTransactions, comparison,
     if (comparisonPeriod) {
         if (comparisonPeriod.startsWith('ytd:')) {
             comparisonLabel = `YTD ${comparisonPeriod.split(':')[1]}`;
+        } else if (comparisonPeriod.startsWith('custom:')) {
+            const parts = comparisonPeriod.split(':');
+            if (parts.length === 3) {
+                const startDate = new Date(parts[1]);
+                const endDate = new Date(parts[2]);
+                const startYear = startDate.getFullYear();
+                const startMonth = monthNames[startDate.getMonth()];
+                const endYear = endDate.getFullYear();
+                const endMonth = monthNames[endDate.getMonth()];
+                if (startYear === endYear) {
+                    comparisonLabel = `${startMonth} - ${endMonth} ${startYear}`;
+                } else {
+                    comparisonLabel = `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
+                }
+            }
         } else if (comparisonPeriod.startsWith('year:')) {
             comparisonLabel = comparisonPeriod.split(':')[1];
         } else if (comparisonPeriod.startsWith('quarter:')) {

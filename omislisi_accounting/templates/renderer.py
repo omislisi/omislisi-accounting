@@ -255,7 +255,7 @@ def render_index(dashboard_data: Dict[str, Any], output_dir: Path):
     </div>
 
     <div class="card">
-        <h2 class="card-header">Recent Trends</h2>
+        <h2 class="card-header">Trends</h2>
         <div class="chart-container small">
             <canvas id="recentTrendsChart"></canvas>
         </div>
